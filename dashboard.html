@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Jocomfort</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8088841258933382" crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #fff;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #1f1f1f;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    h2 {
+      text-align: center;
+      color: #1e88e5;
+      margin-bottom: 1rem;
+    }
+    .section {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border: 1px solid #333;
+      border-radius: 8px;
+    }
+    .section h3 {
+      margin-bottom: 0.5rem;
+      color: #64b5f6;
+    }
+    .info {
+      font-size: 1.1rem;
+      margin: 0.5rem 0;
+    }
+    button, a.button-link {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      margin: 0.5rem 0;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    button:hover, a.button-link:hover {
+      background: #1565c0;
+    }
+    #logout {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #444;
+      text-align: left;
+    }
+    th {
+      background: #1e88e5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>User Dashboard</h2>
+
+    <div class="section">
+      <h3>Welcome, <span id="username">Guest</span></h3>
+      <p class="info">Bonus Balance: ₦<span id="bonus">0</span></p>
+      <p class="info">Deposited Balance: ₦<span id="deposit">0</span></p>
+    </div>
+
+    <div class="section">
+      <h3>Your Referral Info</h3>
+      <p class="info">Referral link:</p>
+      <input type="text" id="refLink" readonly style="width:100%; padding:10px; border-radius:6px;" />
+      <button onclick="copyReferral()">Copy Referral Link</button>
+      <p class="info">You’ve referred <strong><span id="refCount">0</span></strong> people.</p>
+    </div>
+
+    <div class="section">
+      <h3>Referral History</h3>
+      <table>
+        <thead>
+          <tr><th>Referee Username</th><th>Referral Credit</th></tr>
+        </thead>
+        <tbody id="referralTable"></tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>Leaderboard</h3>
+      <table>
+        <thead>
+          <tr><th>User</th><th>Referrals</th></tr>
+        </thead>
+        <tbody id="leaderboard"></tbody>
+      </table>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <a href="index.html" class="button-link">🏠 Home</a>
+      <a href="referral.html" class="button-link">🔗 Referral Page</a>
+      <a href="cart.html" class="button-link">🛒 Cart</a>
+      <a href="deposit.html" class="button-link">💰 Deposit</a>
+    </div>
+
+    <div id="logout">
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <script>
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+      alert("Please login first.");
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("username").textContent = loggedInUser;
+
+    // Balances
+    const depositData = JSON.parse(localStorage.getItem("deposits")) || {};
+    const bonusData = JSON.parse(localStorage.getItem("bonuses")) || {};
+
+    const depositBalance = depositData[loggedInUser] || 0;
+    const referralBonus = (JSON.parse(localStorage.getItem("referredBy")) || {});
+    const welcomeBonus = 25000;
+
+    // Count referrals
+    let referredCount = 0;
+    let tableHTML = "";
+
+    for (const [user, referrer] of Object.entries(referralBonus)) {
+      if (referrer === loggedInUser) {
+        referredCount++;
+        tableHTML += `<tr><td>${user}</td><td>₦1000</td></tr>`;
+      }
+    }
+
+    const totalBonus = 1000 * referredCount + welcomeBonus;
+    document.getElementById("refCount").textContent = referredCount;
+    document.getElementById("bonus").textContent = totalBonus;
+    document.getElementById("deposit").textContent = depositBalance;
+    document.getElementById("referralTable").innerHTML = tableHTML;
+
+    // Referral link
+    const refLink = `https://murtada-2007.github.io/Jocomfort-shop/register.html?ref=${encodeURIComponent(loggedInUser)}`;
+    document.getElementById("refLink").value = refLink;
+
+    function copyReferral() {
+      const input = document.getElementById("refLink");
+      input.select();
+      input.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("Referral link copied!");
+    }
+
+    // Leaderboard
+    const countReferrals = {};
+    for (const ref of Object.values(referralBonus)) {
+      countReferrals[ref] = (countReferrals[ref] || 0) + 1;
+    }
+
+    const leaderboard = Object.entries(countReferrals)
+      .sort((a, b) => b[1] - a[1])
+      .map(([user, count]) => `<tr><td>${user}</td><td>${count}</td></tr>`)
+      .join("");
+
+    document.getElementById("leaderboard").innerHTML = leaderboard;
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>

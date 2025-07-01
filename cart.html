@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Cart - Jocomfort</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8088841258933382"
+    crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+      padding: 1rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    h2 {
+      color: #007bff;
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background: #007bff;
+      color: white;
+    }
+    button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .balance-box {
+      margin: 1rem 0;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .logout {
+      margin-top: 2rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>My Cart</h2>
+
+  <div class="balance-box">
+    <strong>User:</strong> <span id="current-user">Guest</span><br />
+    <strong>Bonus Balance:</strong> ₦<span id="bonus">0</span><br />
+    <strong>Deposit Balance:</strong> ₦<span id="deposit">0</span>
+  </div>
+
+  <table id="cart-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="cart-body">
+      <tr><td colspan="4">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <div style="text-align: center;">
+    <button id="ship-btn" disabled>Ship</button>
+  </div>
+
+  <div class="logout">
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    const user = localStorage.getItem("loggedInUser");
+    if (!user) {
+      alert("Please log in to view your cart.");
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("current-user").textContent = user;
+
+    const carts = JSON.parse(localStorage.getItem("myCarts")) || {};
+    const myCart = carts[user] || [];
+    const cartBody = document.getElementById("cart-body");
+    cartBody.innerHTML = "";
+
+    let total = 0;
+    myCart.forEach(item => {
+      const rowTotal = item.price * item.quantity;
+      total += rowTotal;
+      cartBody.innerHTML += `
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.quantity}</td>
+          <td>₦${item.price.toLocaleString()}</td>
+          <td>₦${rowTotal.toLocaleString()}</td>
+        </tr>
+      `;
+    });
+
+    if (myCart.length === 0) {
+      cartBody.innerHTML = `<tr><td colspan="4">Your cart is empty.</td></tr>`;
+    }
+
+    // Bonus + deposit
+    const refData = JSON.parse(localStorage.getItem("referredBy")) || {};
+    const refCount = Object.values(refData).filter(ref => ref === user).length;
+    const bonus = 25000 + refCount * 1000;
+    const deposit = parseInt(localStorage.getItem("deposit_" + user)) || 0;
+    document.getElementById("bonus").textContent = bonus.toLocaleString();
+    document.getElementById("deposit").textContent = deposit.toLocaleString();
+
+    const shipBtn = document.getElementById("ship-btn");
+    if (bonus + deposit >= 50000 && myCart.length > 0) {
+      shipBtn.disabled = false;
+    }
+
+    shipBtn.onclick = () => {
+      alert("Shipping initiated. You’ll receive your order soon!");
+      localStorage.removeItem("myCarts"); // Clear cart
+      window.location.reload();
+    };
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

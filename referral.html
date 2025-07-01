@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Referral Program - Jocomfort</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8088841258933382"
+    crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f0f0;
+      padding: 2rem;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 1rem 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 10px 15px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .back {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Referral Program</h1>
+  <div class="container">
+    <p><strong>User:</strong> <span id="current-user">Loading...</span></p>
+    <p>Your referral link:</p>
+    <input type="text" id="referral-link" readonly />
+    <button onclick="copyReferral()">Copy Link</button>
+    <p>✅ You have referred <strong><span id="ref-count">0</span></strong> users!</p>
+    <div class="back">
+      <a href="dashboard.html">← Back to Dashboard</a>
+    </div>
+  </div>
+
+  <script>
+    const user = localStorage.getItem("loggedInUser");
+    if (!user) {
+      alert("You must be logged in to access the referral program.");
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("current-user").textContent = user;
+
+    const referralLink = `https://murtada-2007.github.io/Jocomfort-shop/register.html?ref=${encodeURIComponent(user)}`;
+    document.getElementById("referral-link").value = referralLink;
+
+    const refData = JSON.parse(localStorage.getItem("referredBy")) || {};
+    const refCount = Object.values(refData).filter(ref => ref === user).length;
+    document.getElementById("ref-count").textContent = refCount;
+
+    function copyReferral() {
+      const input = document.getElementById("referral-link");
+      input.select();
+      input.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("Referral link copied!");
+    }
+  </script>
+</body>
+</html>
