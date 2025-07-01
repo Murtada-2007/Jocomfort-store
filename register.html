@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - Jocomfort</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8088841258933382"
+    crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      font-weight: bold;
+      border: none;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .link {
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Create Account</h2>
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <input type="text" id="referral" placeholder="Referral Username (optional)" />
+    <button onclick="register()">Register</button>
+    <div class="link">
+      Already have an account? <a href="login.html">Login</a>
+    </div>
+  </div>
+
+  <script>
+    function register() {
+      const username = document.getElementById("username").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const referral = document.getElementById("referral").value.trim();
+
+      if (!username || !email || !password) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+
+      if (users.find(u => u.username === username)) {
+        alert("Username already exists.");
+        return;
+      }
+
+      users.push({ username, email, password });
+      localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("loggedInUser", username);
+
+      // Handle referral
+      if (referral) {
+        const referredBy = JSON.parse(localStorage.getItem("referredBy")) || {};
+        referredBy[username] = referral;
+        localStorage.setItem("referredBy", JSON.stringify(referredBy));
+      }
+
+      alert("Registration successful!");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
